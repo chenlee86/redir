@@ -1,28 +1,27 @@
-// 封装为函数，便于初次加载和 hash 变化时重复调用
-async function handleRedirect() {
-  const key = window.location.hash.replace(/^#\/?/, '');  // 取得去掉 "#/" 的短链键
-
-  // 如果没有 hash（即访问首页），就什么也不做——首页会显示链接列表
-  if (!key) return;
+/* redirect.js  —— 只要 hash 变化就自动跳转 */
+async function handleRedirect () {
+  // 1️⃣ 取得 “#/webssh” 里的 webssh
+  const key = location.hash.replace(/^#\/?/, '');
+  if (!key) return;                 // 首页（没有 hash）什么也不做
 
   try {
-    // 读取映射表
+    // 2️⃣ 读取映射表（加 cache:no-store 保证每次都取到最新）
     const res = await fetch('/map.json', { cache: 'no-store' });
     const map = await res.json();
 
-    // 如果映射存在就跳转，否则显示 404
+    // 3️⃣ 如果映射存在就跳转，否则给 404 提示
     if (map[key]) {
-      window.location.replace(map[key]);   // 不在历史记录中保留短链
+      location.replace(map[key]);   // 不把短链留在历史记录里
     } else {
-      document.body.innerHTML = `<h1>404 Not Found</h1><p>No redirect defined for <code>#/${key}</code></p>`;
+      document.body.innerHTML =
+        `<h1>404 Not Found</h1><p>No redirect for <code>#/${key}</code></p>`;
     }
-  } catch (err) {
-    document.body.innerHTML = `<h1>Error</h1><p>Unable to load redirect map.</p>`;
+  } catch (e) {
+    document.body.innerHTML =
+      `<h1>Error</h1><p>Couldn’t load <code>map.json</code>.</p>`;
   }
 }
 
-// ① 初次加载执行一次
+/* ⬇️  首次加载和以后 hash 变化都调用一次  */
 handleRedirect();
-
-// ② 监听 hash 变化（点击 /#/xxx、手动改 hash、后退按钮都会触发）
-window.addEventListener('hashchange', handleRedirect);
+addEventListener('hashchange', handleRedirect);
