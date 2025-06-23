@@ -1,23 +1,18 @@
 (async () => {
-  const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
   const hash = window.location.hash.replace(/^#\/?/, '');
+
+  if (!hash) return;
 
   try {
     const res = await fetch('/map.json');
     const map = await res.json();
 
-    // 如果带 hash 跳转，则立即跳转
-    if (hash && map[hash]) {
-      window.location.replace(map[hash]);
-      return;
+    if (map[hash]) {
+      window.location.replace(map[hash]); // 直接跳转
+    } else {
+      document.body.innerHTML = `<h1>404 Not Found</h1><p>No redirect defined for <code>#/${hash}</code></p>`;
     }
-
-    // 否则动态生成可点击链接列表
-    const container = document.getElementById('link-container');
-    const ul = document.createElement('ul');
-
-    Object.entries(map).forEach(([key, url]) => {
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.href = url;
-      a.textConte
+  } catch (err) {
+    document.body.innerHTML = `<h1>Error</h1><p>Unable to load redirect map.</p>`;
+  }
+})();
