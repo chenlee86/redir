@@ -6,25 +6,18 @@
     const res = await fetch('/map.json');
     const map = await res.json();
 
-    // 如果有 hash 则立即跳转
+    // 如果带 hash 跳转，则立即跳转
     if (hash && map[hash]) {
       window.location.replace(map[hash]);
       return;
     }
 
-    // 否则渲染首页超链接
+    // 否则动态生成可点击链接列表
+    const container = document.getElementById('link-container');
     const ul = document.createElement('ul');
-    Object.keys(map).forEach(key => {
+
+    Object.entries(map).forEach(([key, url]) => {
       const li = document.createElement('li');
       const a = document.createElement('a');
-      a.href = map[key];
-      a.textContent = `/${key}`;
-      a.target = '_blank';  // 在新窗口打开
-      li.appendChild(a);
-      ul.appendChild(li);
-    });
-    document.body.appendChild(ul);
-  } catch (err) {
-    document.body.innerHTML = `<h1>Error</h1><p>Unable to load redirect map.</p>`;
-  }
-})();
+      a.href = url;
+      a.textConte
